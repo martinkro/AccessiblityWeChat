@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">微信助手</string>
+    <string name="accessibility_wechat_description">微信助手</string>
 </resources>
