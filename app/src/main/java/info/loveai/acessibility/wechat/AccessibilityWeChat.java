@@ -3,6 +3,7 @@ package info.loveai.acessibility.wechat;
 import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.os.Handler;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -19,6 +20,14 @@ public class AccessibilityWeChat extends AccessibilityService {
     private static final String TAG = "WeChatHelper";
     boolean mIsOpenRP = false;
     boolean mIsOpenDetail = false;
+
+    private Handler mHandler = new Handler();
+
+    @Override
+    public AccessibilityNodeInfo getRootInActiveWindow() {
+        return super.getRootInActiveWindow();
+    }
+
     private List<String> ids = Arrays.asList("bjj", "bi3", "brt");
     public void onAccessibilityEvent(AccessibilityEvent event){
         int eventType = event.getEventType();
@@ -116,14 +125,18 @@ public class AccessibilityWeChat extends AccessibilityService {
 //                }
 //            }
 
-            mIsOpenDetail = false;
-            AccessibilityNodeInfo root = getRootInActiveWindow();
-            openRedPacket(root);
+//            mIsOpenDetail = false;
+//            AccessibilityNodeInfo root = getRootInActiveWindow();
+//            openRedPacket(root);
 
             if (!mIsOpenDetail){
-                performGlobalAction(GLOBAL_ACTION_HOME);
-                performGlobalAction(GLOBAL_ACTION_RECENTS);
+                mHandler.postDelayed(mRunnableOpenRedPacket,100);
             }
+
+//            if (!mIsOpenDetail){
+//                performGlobalAction(GLOBAL_ACTION_HOME);
+//                performGlobalAction(GLOBAL_ACTION_RECENTS);
+//            }
 //            int count = 5;
 //            while(count-- != 0){
 //                if (!mIsOpenDetail){
@@ -172,6 +185,14 @@ public class AccessibilityWeChat extends AccessibilityService {
         }
     }
 
+    private Runnable mRunnableOpenRedPacket = new Runnable() {
+        @Override
+        public void run() {
+            AccessibilityNodeInfo root = getRootInActiveWindow();
+            openRedPacket(root);
+        }
+    };
+
     private void openRedPacket(AccessibilityNodeInfo rootNode) {
         if (rootNode == null) return;
 
@@ -185,10 +206,10 @@ public class AccessibilityWeChat extends AccessibilityService {
                 Log.d(TAG,"class name:" + node.getClassName());
             }
 
-            if (node.isClickable()){
-                node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                Log.d(TAG,"click class name:" + node.getClassName());
-            }
+//            if (node.isClickable()){
+//                node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//                Log.d(TAG,"click class name:" + node.getClassName());
+//            }
             if ("android.widget.Button".equals(node.getClassName())) {
                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
 
@@ -208,6 +229,14 @@ public class AccessibilityWeChat extends AccessibilityService {
 
 
     private void handleWindowContentChanged(AccessibilityEvent event){
+        int contentChangeType = event.getContentChangeTypes();
+        switch (contentChangeType){
+            case AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE:
+                break;
+            default:
+                break;
+        }
+        Log.d(TAG,"content change type:" + contentChangeType);
         AccessibilityNodeInfo root = getRootInActiveWindow();
         if (root == null) return;
         if (root != null){
